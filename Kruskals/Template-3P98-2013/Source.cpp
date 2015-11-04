@@ -6,23 +6,24 @@ pe12nh
 
 #include <stdlib.h>
 #include <iostream>
-#include <vector>
-#include <algorithm>
+#include <vector>	//vector	
+#include <algorithm>	//sort
 #include <freeglut.h>
 #include <FreeImage.h>
-
+#include <random>	//rng
 #include "Tuple.h"
 #include "Edge.h"
-#include <random>
+
 
 std::random_device rd;     // only used once to initialise (seed) engine
 std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-std::uniform_int_distribution<int> uni(-400, 400); // guaranteed unbiased
+std::uniform_int_distribution<int> uni(-150, 150); // guaranteed unbiased
 
 
 
 std::vector<Tuple> points_store;
 std::vector<Edge> edge_list;
+float angle = 0.0;
 
 
 
@@ -38,7 +39,7 @@ void makePoints(int n){
 	points_store.resize(n);
 
 	for (int i = 0; i < n; i++){
-		points_store[i] = Tuple(uni(rng), uni(rng));
+		points_store[i] = Tuple(uni(rng), uni(rng), uni(rng));
 	}
 
 }
@@ -66,23 +67,40 @@ void makeEdges(){
 void drawStuff(){
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColor3f(1.0, 1.0, 1.0);
-
+	glRotatef(angle, 0.0, 1.0, 0.0);
 	glMatrixMode(GL_MODELVIEW);
 	glPointSize(5.0f);
+	
+	glBegin(GL_LINES);
+		glVertex3i(100,-100,-100);
+		glVertex3i(100, 100, 100);
+	glEnd();
+
 	glBegin(GL_POINTS);
-	glVertex3i(0, 0, 0);
-
-	for (int i = 0; i < points_store.size(); i++){
-
-		glVertex3i(points_store.at(i)._x,
-			points_store.at(i)._y,
-			points_store.at(i)._z);
-	}
+		for (int i = 0; i < points_store.size(); i++){
+			glVertex3i(points_store.at(i)._x,
+					   points_store.at(i)._y,
+					   points_store.at(i)._z);
+		}
 	glEnd();
 	glutSwapBuffers();
 	glFlush();
 }
+void mouse(int btn, int state, int x, int y) {
 
+	printf("%3d, %3d, %f\n", btn, state, angle);
+	if (state == GLUT_DOWN) {
+		if (btn == GLUT_LEFT_BUTTON) {
+			angle = angle + 1.0;
+		}
+		else if (btn == GLUT_RIGHT_BUTTON) {
+			angle = angle - 1.0;
+		}
+		else {
+			angle = 0.0;
+		}
+	}
+}
 int main(int argc, char **argv) {
 	makePoints(500);
 	glutInit(&argc, argv);
@@ -93,12 +111,13 @@ int main(int argc, char **argv) {
 
 	glutDisplayFunc(drawStuff);
 	glutIdleFunc(drawStuff);
-
+	glutMouseFunc(mouse);
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(-500.0, 500.0, -500.0, 500.0, -500.0, 0.0);
+	glOrtho(-200.0, 200.0, -200.0, 200.0, -200.0, 200.0);
 
 	glMatrixMode(GL_MODELVIEW);
-	glRotatef(0.0, 0.0, 0.0, 0.0);
+
+	//glRotatef(30.0, 0.0, 0.0, 0.0);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	glutMainLoop();
