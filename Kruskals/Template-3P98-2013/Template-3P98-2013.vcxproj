@@ -88,10 +88,12 @@ copy "$(ProjectDir)FreeImage\freeimaged.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Tuple.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Edge2D.h" />
-    <ClInclude Include="Tuple2D.h" />
+    <ClInclude Include="Edge.h" />
+    <ClInclude Include="DisUnion.h" />
+    <ClInclude Include="Tuple.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

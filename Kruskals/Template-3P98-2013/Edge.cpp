@@ -1,17 +1,17 @@
-#include "Edge2D.h"
+#include "Edge.h"
 
+Edge::Edge(){
+	_u = 0;
+	_v = 0;
+	_wht = 0;
+}
 
-
-Edge2D::Edge2D(Tuple2D u, Tuple2D v){
+Edge::Edge(int u, int v, std::vector<Tuple>* points){
 	_u = u;
 	_v = v;
-	_wht = u.calcDist(v);
+	_wht = this->setWht(points);
 }
 
-int Edge2D::getWht(){
-	return _wht;
-}
-
-void Edge2D::printEdge(){
-
+int Edge::setWht(std::vector<Tuple>* v){
+	return v->at(this->_u).calcDist(v->at(this->_v));
 }
