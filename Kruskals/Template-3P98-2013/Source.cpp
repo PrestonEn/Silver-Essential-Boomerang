@@ -13,62 +13,93 @@ pe12nh
 
 #include "Tuple.h"
 #include "Edge.h"
+#include <random>
 
-void display(){
+std::random_device rd;     // only used once to initialise (seed) engine
+std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+std::uniform_int_distribution<int> uni(-400, 400); // guaranteed unbiased
+
+
+
+std::vector<Tuple> points_store;
+std::vector<Edge> edge_list;
+
+
+
+	//for (std::vector<Edge>::iterator i = edge_list.begin(); i != edge_list.end(); ++i){
+	//	std::cout << i->_wht << "\n";
+	//}
+
+
+
+
+//setup data in global Tuple vector
+void makePoints(int n){
+	points_store.resize(n);
+
+	for (int i = 0; i < n; i++){
+		points_store[i] = Tuple(uni(rng), uni(rng));
+	}
 
 }
 
-void makeEdges(){
-
-}
-
+//function for algo std::sort
 bool comparision(const Edge& a, const Edge& b)
 {
-	// smallest comes first
 	return a._wht < b._wht;
 }
 
 
-int main(int argc, char** argv)
-{
-	std::vector<Tuple> points_store;
-	std::vector<Edge> edge_list;
-	points_store.resize(10);
-
-	for (int i = 0; i < 10; i++){
-		points_store[i] = Tuple(rand() % 500, rand() % 500);
-	}
-
+void makeEdges(){
 	//edge_list.resize(45);
-	int x = 0;
-	for (int i = 0; i < 10; i++){
-		for (int j = 0; j < 10; j++){
-			if (i<j){
+	for (int i = 0; i < points_store.size(); i++){
+		for (int j = points_store.size(); j < points_store.size(); j++){
+			if (i<j){	//do not calculate edge (u,u) , or edge pair (u, v) (v, u)
 				edge_list.push_back(Edge(i, j, &points_store));
-				++x;
 			}
 		}
 	}
-	
-	std::cout << edge_list.size() << "STUFF\n";
+
 	std::sort(edge_list.begin(), edge_list.end(), comparision);
-	
-	/*for (auto n : edge_list) {
-		std::cout << n._wht << "\n";
-	}*/
+}
 
-	for (std::vector<Edge>::iterator i = edge_list.begin(); i != edge_list.end(); ++i){
-		std::cout << i->_wht << "\n";
+void drawStuff(){
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(1.0, 1.0, 1.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPointSize(5.0f);
+	glBegin(GL_POINTS);
+	glVertex3i(0, 0, 0);
+
+	for (int i = 0; i < points_store.size(); i++){
+
+		glVertex3i(points_store.at(i)._x,
+			points_store.at(i)._y,
+			points_store.at(i)._z);
 	}
-	//glutInit(&argc, argv);
-	//glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	//glutInitWindowSize(500, 500);
-	//glutInitWindowPosition(100, 100);
-	//glutCreateWindow(".::Conway's Game of Life::. The Glider");
-	//init();
-	//glutDisplayFunc(display);
-	//glutMainLoop();
+	glEnd();
+	glutSwapBuffers();
+	glFlush();
+}
 
-	getchar();
-	return 0;
+int main(int argc, char **argv) {
+	makePoints(500);
+	glutInit(&argc, argv);
+	glutInitWindowSize(1000, 1000);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+	glutCreateWindow("Glut rotate");
+
+
+	glutDisplayFunc(drawStuff);
+	glutIdleFunc(drawStuff);
+
+	glMatrixMode(GL_PROJECTION);
+	glOrtho(-500.0, 500.0, -500.0, 500.0, -500.0, 0.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glRotatef(0.0, 0.0, 0.0, 0.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+
+	glutMainLoop();
 }
