@@ -70,6 +70,10 @@ void makeEdges(){
 }
 
 
+void addNewPoint(){
+
+}
+
 void drawStuff(){
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColor3f(1.0, 1.0, 1.0);
@@ -85,24 +89,19 @@ void drawStuff(){
 
 	glColor3f(0, 1, 0);
 	glBegin(GL_LINES);
-	//draw the unit vectors
-	glVertex3i(0, 0, 0);
-	glVertex3i(0, 15, 0);
+		glVertex3i(0, 0, 0);
+		glVertex3i(0, 15, 0);
 	glEnd();
 
 	glColor3f(0, 0, 1);
 	glBegin(GL_LINES);
-	//draw the unit vectors
-	glVertex3i(0, 0, 0);
-	glVertex3i(0, 0, 15);
+		glVertex3i(0, 0, 0);
+		glVertex3i(0, 0, 15);
 	glEnd();
 
 	glLineWidth(3);
 	glColor3ub(51, 255, 102);
 	glBegin(GL_LINES);
-
-	
-
 
 	for (int i = 0; i < edge_list.size(); i++){
 		glVertex3i(points_store.at(edge_list.at(i)._u)._x,
@@ -163,7 +162,7 @@ void motion(int x, int y) {
 }
 
 int main(int argc, char **argv) {
-	makePoints(10);
+	makePoints(40);
 	makeEdges();
 
 	glutInit(&argc, argv);
