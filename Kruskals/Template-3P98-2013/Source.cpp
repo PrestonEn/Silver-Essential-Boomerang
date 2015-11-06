@@ -147,6 +147,7 @@ void drawStuff(){
 	glBegin(GL_LINES);
 
 	for (int i = 0; i < kst_edges.size(); i++){
+		glColor3ub(points_store.at(kst_edges.at(i)._u)._x, points_store.at(kst_edges.at(i)._u)._y, points_store.at(kst_edges.at(i)._u)._z);
 		glVertex3i(points_store.at(kst_edges.at(i)._u)._x,
 			points_store.at(kst_edges.at(i)._u)._y,
 			points_store.at(kst_edges.at(i)._u)._z);
@@ -157,17 +158,18 @@ void drawStuff(){
 	}
 	glEnd();
 
-	glBegin(GL_POINTS);
-	for (int i = 0; i < points_store.size(); i++){
-		glVertex3i(points_store.at(i)._x,
-			points_store.at(i)._y,
-			points_store.at(i)._z);
-	}
-	glEnd();
+	//glBegin(GL_POINTS);
+	//for (int i = 0; i < points_store.size(); i++){
+	//	glVertex3i(points_store.at(i)._x,
+	//		points_store.at(i)._y,
+	//		points_store.at(i)._z);
+	//}
+	//glEnd();
 	glutSwapBuffers();
 	glFlush();
 }
 void mouse(int btn, int state, int x, int y) {
+
  
 }
 //naive rotation on mouse
@@ -195,6 +197,12 @@ void motion(int x, int y) {
 	//}
 }
 
+void keyboard(unsigned char key, int x, int y){
+	if (key == '+'){
+		glScaled(0.0, 0.0, 10.0);
+	}
+}
+
 int main(int argc, char **argv) {
 	makePoints(5000);
 	makeEdges();
@@ -208,6 +216,7 @@ int main(int argc, char **argv) {
 	//glutSetCursor(GLUT_CURSOR_NONE);
 	glutDisplayFunc(drawStuff);
 	glutIdleFunc(drawStuff);
+	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
 	glutPassiveMotionFunc(motion);
 	glMatrixMode(GL_PROJECTION);
