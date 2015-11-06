@@ -8,17 +8,19 @@ Tuple::Tuple(){
 }
 
 //3d constructor
-Tuple::Tuple(int x, int y, int z){
+Tuple::Tuple(int x, int y, int z, int f){
 	this->_x = x;
 	this->_y = y;
 	this->_z = z;
+	_frst = f;
 }
 
 //2d constructor
-Tuple::Tuple(int x, int y){
+Tuple::Tuple(int x, int y, int f){
 	this->_x = x;
 	this->_y = y;
 	this->_z = 0;
+	_frst = f;
 }
 
 //distance

@@ -6,12 +6,8 @@ Edge::Edge(){
 	_wht = 0;
 }
 
-Edge::Edge(int u, int v, std::vector<Tuple>* points){
+Edge::Edge(int u, int v, int wht){
 	_u = u;
 	_v = v;
-	_wht = this->setWht(points);
-}
-
-int Edge::setWht(std::vector<Tuple>* v){
-	return v->at(this->_u).calcDist(v->at(this->_v));
+	_wht = wht;
 }

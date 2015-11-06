@@ -15,7 +15,8 @@ public:
 	int _wht; //dist of point
 
 	Edge::Edge();
-	Edge::Edge(int u, int v, std::vector<Tuple>* points);
+
+	Edge::Edge(int u, int v, int wht);
 	
 	void Edge::printEdge();
 
