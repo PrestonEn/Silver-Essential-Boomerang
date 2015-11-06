@@ -1,13 +1,8 @@
-/* An example of how to read an image (img.tif) from file using freeimage and then
-display that image using openGL's drawPixelCommand. Also allow the image to be saved
-to backup.tif with freeimage and a simple thresholding filter to be applied to the image.
-Conversion by Lee Rozema.
-Added triangle draw routine, fixed memory leak and improved performance by Robert Flack (2008)
-*/
+
+
+#include <vector>
 
 #include <stdlib.h>
-
-
 #include <stdio.h>
 #include <malloc.h>
 #include <freeglut.h>
@@ -25,7 +20,9 @@ typedef struct {
 } glob;
 glob global;
 
-//read image
+/*
+
+*/
 pixel *read_img(char *name, int *width, int *height) {
 	FIBITMAP *image;
 	int i, j, pnum;

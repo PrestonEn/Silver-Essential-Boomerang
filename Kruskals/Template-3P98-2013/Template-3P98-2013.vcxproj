@@ -86,6 +86,7 @@ copy "$(ProjectDir)FreeImage\freeimaged.dll" "$(OutDir)"</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DisUnion.cpp" />
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Tuple.cpp" />
