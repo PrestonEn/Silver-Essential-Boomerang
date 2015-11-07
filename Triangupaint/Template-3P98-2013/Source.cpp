@@ -15,10 +15,11 @@ using namespace std;
 ///INITIALIZE RANDOM NUMBER GENERATOR
 random_device rd;     // only used once to initialise (seed) engine
 mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-uniform_int_distribution<int> uni(50, 700);
+uniform_int_distribution<int> uni(50, 750);
 
 vector<Point> point_store;
 vector<Edge> hull_store;
+Point* hulCG;
 
 int distPointToLine(Point& P1, Point& P2, Point& p){
 	int num = (P2._y - P1._y)*p._x - (P2._x - P1._x)*p._y + (P2._x*P1._y) - (P2._y*P1._x);
@@ -54,7 +55,7 @@ void genPoints(int n){
 }
 
 
-void covexHull(vector<Point> p_set, int u, int v){
+void covexHull(vector<Point>& p_set, int u, int v){
 	int d = 0;
 	int pMax = -1;
 	for (int i = 0; i < p_set.size(); i++){
@@ -83,11 +84,35 @@ void quickHull(vector<Point> p_set, int u, int v){
 }
 
 
-
+Point hullCOG(){
+	int count = 0;
+	int sumx, sumy;
+	sumx = sumy=0;
+	for (int i = 0; i < hull_store.size(); i++){
+		sumx += point_store[hull_store[i]._u]._x;
+		sumy += point_store[hull_store[i]._u]._y;
+		count++;
+	}
+	return Point(sumx / count, sumy / count);
+}
 
 
 void display(){
 
+	glPointSize(6);
+	glBegin(GL_POINTS);
+	glColor3f(1.0, 1.0, 0);
+	for (int i = 0; i < point_store.size(); i++){
+		glVertex2i(point_store[i]._x, point_store[i]._y);
+	}
+	glEnd();
+	glFlush();
+
+	glBegin(GL_POINTS);
+	glColor3f(1.0, 0, 0);
+	glVertex2i(hulCG->_x, hulCG->_y);
+	glEnd();
+	glFlush();
 }
 
 
@@ -95,7 +120,9 @@ int main(int argc, char** argv){
 
 	glutInit(&argc, argv);
 	genPoints(200);
-
+	quickHull(point_store , 0, point_store.size() - 1);
+	hulCG = &hullCOG();
+	cout << hulCG->_x << "\t" << hulCG->_y;
 	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
 
 	glutInitWindowSize(750, 750);
@@ -103,7 +130,7 @@ int main(int argc, char** argv){
 	glShadeModel(GL_SMOOTH);
 	glutDisplayFunc(display);
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(0, 750, 0, 750, 0, 1);
+	glOrtho(0, 800, 0, 800, 0, 1);
 
 	glutMainLoop();
 
