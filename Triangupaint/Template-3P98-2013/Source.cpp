@@ -82,6 +82,10 @@ void quickHull(vector<Point> p_set, int u, int v){
 	covexHull(point_store, 0, point_store.size() - 1);
 }
 
+
+
+
+
 void display(){
 
 }
@@ -95,7 +99,7 @@ int main(int argc, char** argv){
 	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
 
 	glutInitWindowSize(750, 750);
-	glutCreateWindow("SIMPLE DISPLAY");
+	glutCreateWindow("Triangulate");
 	glShadeModel(GL_SMOOTH);
 	glutDisplayFunc(display);
 	glMatrixMode(GL_PROJECTION);
