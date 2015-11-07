@@ -1,17 +1,17 @@
 class Triangle
 {
 public:
-	Triangle();
-	~Triangle();
+	int _e1;
+	int _e2;
+	int _e3;
 
-private:
+	Triangle(int e1, int e2, int e3);
 
 };
 
-Triangle::Triangle()
+Triangle::Triangle(int e1, int e2, int e3 )
 {
-}
-
-Triangle::~Triangle()
-{
+	_e1 = e1;
+	_e2 = e2;
+	_e3 = e3;
 }

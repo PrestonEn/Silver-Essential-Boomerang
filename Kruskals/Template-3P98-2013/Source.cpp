@@ -26,7 +26,7 @@ enum DIM_MODE
 ///INITIALIZE RANDOM NUMBER GENERATOR
 std::random_device rd;     // only used once to initialise (seed) engine
 std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-std::uniform_int_distribution<int> uni(-75, 75);
+std::uniform_int_distribution<int> uni(-400, 400);
 ///VECTOR
 std::vector<Tuple> points_store;
 std::vector<DisUnion> union_store;
@@ -177,7 +177,7 @@ void motion(int x, int y)
 
 int main(int argc, char **argv) 
 {
-	makePoints(5000);
+	makePoints(1000);
 	makeEdges();
 	krustyTheKruskals();
 	std::cout << sizeof(&points_store);
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
 	glutIdleFunc(drawStuff);
 	glutPassiveMotionFunc(motion);
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(-200.0, 200.0, -200.0, 200.0, -200.0, 200.0);
+	glOrtho(-800.0, 800.0, -800.0, 800.0, -800.0, 800.0);
 
 	glMatrixMode(GL_MODELVIEW);
 

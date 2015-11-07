@@ -1,17 +1,14 @@
 class Edge
 {
 public:
-	Edge();
-	~Edge();
-
-private:
+	int _u, _v;
+	Edge(int u, int v);
 
 };
 
-Edge::Edge()
+Edge::Edge(int u, int v)
 {
+	_u = u;
+	_v = v;
 }
 
-Edge::~Edge()
-{
-}
