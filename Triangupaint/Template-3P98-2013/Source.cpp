@@ -20,19 +20,15 @@ uniform_int_distribution<int> uni(50, 700);
 vector<Point> point_store;
 vector<Edge> hull_store;
 
-vector<int> hull_set;
-
 int distPointToLine(Point& P1, Point& P2, Point& p){
 	int num = (P2._y - P1._y)*p._x - (P2._x - P1._x)*p._y + (P2._x*P1._y) - (P2._y*P1._x);
 	int den = P1.distance(P2);
 	return num / (int)sqrt(den);
 }
 
-//test if point is left/right/colinear to line
-double crossProd(Point& P1, Point& P2, Point& P3){
-	cout << P1._x << "\t" << P1._y << "\t" << P2._x << "\t" << P2._y << "\t" << P3._x << "\t" << P3._y << "\n";
-	cout << (long)(P2._x - P1._x)*(P3._y - P1._y) - (long)(P2._y - P1._y)*(P3._x - P1._x) << "\n";
-	return (long)(P2._x - P1._x)*(P3._y - P1._y) - (long)(P2._y - P1._y)*(P3._x - P1._x);
+//if 0, p3 is colinear to O,P2
+double crossProd(Point& O, Point& P2, Point& P3){
+	return (long)(P2._x - O._x)*(P3._y - O._y) - (long)(P2._y - O._y)*(P3._x - O._x);
 }
 
 bool isUnique(Point& point){
@@ -58,7 +54,7 @@ void genPoints(int n){
 }
 
 
-void covexUpperHull(vector<Point> p_set, int u, int v){
+void covexHull(vector<Point> p_set, int u, int v){
 	int d = 0;
 	int pMax = -1;
 	for (int i = 0; i < p_set.size(); i++){
@@ -76,12 +72,15 @@ void covexUpperHull(vector<Point> p_set, int u, int v){
 		return;
 	}
 	else{
-		covexUpperHull(p_set, u, pMax);
-		covexUpperHull(p_set, pMax, v);
+		covexHull(p_set, u, pMax);
+		covexHull(p_set, pMax, v);
 	}
 }
 
-
+void quickHull(vector<Point> p_set, int u, int v){
+	covexHull(point_store, point_store.size() - 1, 0);
+	covexHull(point_store, 0, point_store.size() - 1);
+}
 
 void display(){
 
@@ -92,10 +91,7 @@ int main(int argc, char** argv){
 
 	glutInit(&argc, argv);
 	genPoints(200);
-	covexUpperHull(point_store, point_store.size() - 1, 0);
-	covexUpperHull(point_store,0, point_store.size() - 1);
 
-	cout << edge_store.size();
 	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
 
 	glutInitWindowSize(750, 750);
