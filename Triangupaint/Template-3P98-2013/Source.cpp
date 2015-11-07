@@ -47,18 +47,15 @@ void genPoints(int n){
 	int i = 0;
 	while (i < n){
 		Point x = Point(uni(rng), uni(rng));
-
-		if (x._x > maxX){
-			maxX = x._x;
-			p_maxX = &x;
-		}
-
-		if (x._x < minX){
-			minX = x._x;
-			p_minX = &x;
-		}
-
 		if (isUnique(x)){
+			if (x._x > maxX){
+				maxX = x._x;
+				p_maxX = &x;
+			}else if(x._x < minX){
+				minX = x._x;
+				p_minX = &x;
+			}
+
 			i++;
 			point_store.push_back(x);
 		}
