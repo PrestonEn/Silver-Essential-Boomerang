@@ -2,9 +2,6 @@
 #include <algorithm>
 #include <random>
 #include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
-#include <malloc.h>
 #include <freeglut.h>
 #include <FreeImage.h>
 #include "Edge.h"
@@ -25,6 +22,7 @@ uniform_int_distribution<int> uni(50, 750);
 vector<Point> point_store;
 vector<int> hull_store;
 vector<Triangle> triangle_store;
+vector<Triangle> trisect_store;
 int numPoints, input_mode;
 
 int initStatus(){
@@ -57,17 +55,24 @@ int initStatus(){
 	}
 }
 
+//signed distance of point
 int distPointToLine(Point& P1, Point& P2, Point& p){
 	int num = (P2._y - P1._y)*p._x - (P2._x - P1._x)*p._y + (P2._x*P1._y) - (P2._y*P1._x);
 	int den = P1.distance(P2);
+	if (den == 0){
+		den = 1;
+	}
 	return num / (int)sqrt(den);
 }
 
-//if 0, p3 is colinear to O,P2
+//if 0, p3 is colinear to vector(O,P2)
 double crossProd(Point& O, Point& P2, Point& P3){
 	return (long)(P2._x - O._x)*(P3._y - O._y) - (long)(P2._y - O._y)*(P3._x - O._x);
 }
 
+//Test uniqueness of point
+//switch to hash function 
+//in future branch
 bool isUnique(Point& point){
 	for (auto P : point_store){
 		if (P._x == point._x && P._y == point._y){
@@ -142,7 +147,66 @@ int hullCOG(){
 	return closestPoint(Point(sumx / count, sumy / count));
 }
 
-//trisect()
+
+void trisect(Triangle& Ti){
+	int sumX = point_store[Ti._p1]._x +
+			   point_store[Ti._p2]._x +
+			   point_store[Ti._p3]._x;
+	
+	int sumY = point_store[Ti._p1]._y +
+		       point_store[Ti._p2]._y +
+			   point_store[Ti._p3]._y;
+	
+	int p =  closestPoint(Point(sumX/3, sumY/3));
+
+	if (!Ti.testInterior(point_store, p)){
+		trisect_store.push_back(Ti);
+		return;
+	}
+	else{
+		trisect(Triangle(Ti._p1, Ti._p2, p));
+		trisect(Triangle(Ti._p2, Ti._p3, p));
+		trisect(Triangle(Ti._p3, Ti._p1, p));
+	}
+}
+
+bool triCleanUp(){
+	bool change_made = false;
+	for (int i = 0; i < trisect_store.size() - 2; i++){
+		for (int j = i+1; j < trisect_store.size() - 1; j++){
+			if (i != j){
+				Edge test = trisect_store[i].sharedEdge(trisect_store[j]);
+				if (test._u >= 0 && i != j){
+
+					int ti_p, tj_p;
+					int d1, d2, s1, s2;
+
+					if (trisect_store[i]._p1 != test._u && trisect_store[i]._p1 != test._v){ ti_p = trisect_store[i]._p1; }
+					else if (trisect_store[i]._p2 != test._u && trisect_store[i]._p2 != test._v){ ti_p = trisect_store[i]._p2; }
+					else{ ti_p = trisect_store[i]._p3; }
+
+					if (trisect_store[j]._p1 != test._u && trisect_store[j]._p1 != test._v){ tj_p = trisect_store[j]._p1; }
+					else if (trisect_store[j]._p2 != test._u && trisect_store[j]._p2 != test._v){ tj_p = trisect_store[j]._p2; }
+					else { tj_p = trisect_store[j]._p3; }
+
+					d1 = abs(point_store[test._u].distance(point_store[test._v]));
+					d2 = abs(point_store[ti_p].distance(point_store[tj_p]));
+					s1 = distPointToLine(point_store[ti_p], point_store[tj_p], point_store[test._u]);
+					s2 = distPointToLine(point_store[ti_p], point_store[tj_p], point_store[test._v]);
+
+					bool op_signs = (s1 > 0 && s2 < 0 || s1 < 0 && s2 > 0);
+					if (d1 > d2 && op_signs){
+						change_made = true;
+						trisect_store[i] = Triangle(test._u, ti_p, tj_p);
+						trisect_store[j] = Triangle(test._v, ti_p, tj_p);
+					}
+				}
+				}
+			}
+		}
+	return change_made;
+}
+
 
 void triangulate(){
 	sort(point_store.begin(), point_store.end(), [](Point p, Point q){return p._x < q._x; });
@@ -165,14 +229,22 @@ void triangulate(){
 			triangle_store.push_back(Triangle(hull_store[i], hull_store[j], cog_index));
 		}
 	}
+	for (auto T : triangle_store){
+		trisect(T);
+	}
+	bool flag = true;
+	while (flag){
+		flag = triCleanUp();
+	}
 }
 
 
-void display(){
 
-	glPointSize(6);
-	glBegin(GL_LINES);
-	for (auto T : triangle_store){
+
+void display(){
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_TRIANGLES);
+	for (auto T : trisect_store){
 		glVertex2i(point_store[T._p1]._x, point_store[T._p1]._y);
 		glVertex2i(point_store[T._p2]._x, point_store[T._p2]._y);
 		glVertex2i(point_store[T._p3]._x, point_store[T._p3]._y);
@@ -195,7 +267,7 @@ void mouse(int btn, int state, int x, int y) {
 
 int main(int argc, char** argv){
 	//input_mode = initStatus();
-	randomPoints(5);
+	randomPoints(1000);
 	triangulate();
 	glutInit(&argc, argv);
 
