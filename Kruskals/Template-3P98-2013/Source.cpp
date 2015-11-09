@@ -189,7 +189,7 @@ void cleanUp(){
 
 int main(int argc, char **argv) 
 {
-	makePoints(8900);
+	makePoints(100);
 	makeEdges();
 	krustyTheKruskals();
 	std::cout << sizeof(&points_store);

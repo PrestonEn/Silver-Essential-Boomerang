@@ -62,24 +62,50 @@ int Triangle::testInterior(std::vector<Point>& points, int p){
 	}
 }
 
-
+///Account for all cases oh my laws
+///
+///
+///
 Edge Triangle::sharedEdge(Triangle Ti){
-	if (_p1 == Ti._p1 && _p2 == Ti._p2){
-		return Edge(_p1, _p2);
+	int arr_one[3] = { _p1, _p2, _p3 };
+	int arr_two[3] = { Ti._p1, Ti._p2, Ti._p3 };
+	int e[2];
+	int ind = 0;
+	for (auto i : arr_one){
+		for (auto j : arr_two){
+			if (i == j && ind < 2){
+				e[ind] = i;
+				ind++;
+			}
+		}
+	}
+	if (ind == 2){
+		return Edge(e[0], e[1]);
 	}
 
-	if (_p2 == Ti._p2 && _p3 == Ti._p3){
-		return Edge(_p2, _p3);
+	int arr_one_[3] = {_p3, _p2, _p1 };
+	int arr_two_[3] = { Ti._p3, Ti._p2, Ti._p1 };
+	ind = 0;
+	for (auto i : arr_one_){
+		for (auto j : arr_two_){
+			if (i == j && ind < 2){
+				e[ind] = i;
+				ind++;
+			}
+		}
+	}	
+	if (ind == 2){
+		return Edge(e[0], e[1]);
 	}
 
-	if (_p1 == Ti._p1 && _p3 == Ti._p3){
-		return Edge(_p1, _p3);
-	}
 	return Edge(-1, -1);
+
 }
+
 
 Triangle Triangle::getNonColinPoint(std::vector<Point>& points, int p){
 	bool p1, p2, p3;
+	p1 = p2 = p3 = true;
 	if (points[p].colinear(points[_p1], points[_p2])){
 		p1 = false;
 		p2 = false;

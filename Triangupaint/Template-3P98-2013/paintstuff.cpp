@@ -127,30 +127,30 @@ void MyFilter(pixel* Im, int myIm_Width, int myIm_Height){
 
 
 /*glut keyboard function*/
-void keyboard(unsigned char key, int x, int y)
-{
-	switch (key)
-	{
-	case 0x1B:
-	case'q':
-	case 'Q':
-		exit(0);
-		break;
-	case's':
-	case'S':
-		printf("SAVING IMAGE: backup.tif\n");
-		write_img("backup.tif", global.data, global.w, global.h);
-		break;
-	case 't':
-	case 'T':
-		draw_triangle();
-		break;
-	case'f':
-	case'F':
-		MyFilter(global.data, global.w, global.h);
-		break;
-	}
-}//keyboard
+//void keyboard(unsigned char key, int x, int y)
+//{
+//	switch (key)
+//	{
+//	case 0x1B:
+//	case'q':
+//	case 'Q':
+//		exit(0);
+//		break;
+//	case's':
+//	case'S':
+//		printf("SAVING IMAGE: backup.tif\n");
+//		write_img("backup.tif", global.data, global.w, global.h);
+//		break;
+//	case 't':
+//	case 'T':
+//		draw_triangle();
+//		break;
+//	case'f':
+//	case'F':
+//		MyFilter(global.data, global.w, global.h);
+//		break;
+//	}
+//}//keyboard
 
 
 //int main(int argc, char** argv)
