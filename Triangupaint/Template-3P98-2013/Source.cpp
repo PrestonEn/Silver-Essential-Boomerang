@@ -195,21 +195,56 @@ void trisect(Triangle& Ti){
 ///
 ///
 ///
-bool triCleanUp(){
+int  triCleanUp(){
 	Edge *e;
+	int flag = 0;
 	for (int i = 0; i < trisect_store.size(); i++){
 		for (int j = 0; j < trisect_store.size(); j++){
-			if (i != j){
+			if (i != j && j > i){
 				e = &trisect_store[i].sharedEdge(trisect_store[j]);
 				if (e->_u != -1){
+					Triangle &t1 = trisect_store[i];
+					Triangle &t2 = trisect_store[j];
+					int t1_p, t2_p;
+					
+					if (t1._p1 == e->_u && t1._p2 == e->_v){ t1_p = t1._p3; }
+					if (t1._p2 == e->_u && t1._p1 == e->_v){ t1_p = t1._p3; }
+					if (t1._p3 == e->_u && t1._p2 == e->_v){ t1_p = t1._p1; }
+					if (t1._p2 == e->_u && t1._p3 == e->_v){ t1_p = t1._p1; }
+					if (t1._p1 == e->_u && t1._p3 == e->_v){ t1_p = t1._p2; }
+					if (t1._p3 == e->_u && t1._p1 == e->_v){ t1_p = t1._p2; }
 
+					if (t2._p1 == e->_u && t2._p2 == e->_v){ t2_p = t2._p3; }
+					if (t2._p2 == e->_u && t2._p1 == e->_v){ t2_p = t2._p3; }
+					if (t2._p3 == e->_u && t2._p2 == e->_v){ t2_p = t2._p1; }
+					if (t2._p2 == e->_u && t2._p3 == e->_v){ t2_p = t2._p1; }
+					if (t2._p1 == e->_u && t2._p3 == e->_v){ t2_p = t2._p2; }
+					if (t2._p3 == e->_u && t2._p1 == e->_v){ t2_p = t2._p2; }
 
+					int d1 = abs(point_store[e->_u].distance(point_store[e->_v]));
+					int d2 = abs(point_store[t1_p].distance(point_store[t2_p]));
+					int p2 = distPointToLine(point_store[e->_u], point_store[t1_p], point_store[t2_p]);
+					int p4 = distPointToLine(point_store[e->_v], point_store[t1_p], point_store[t2_p]);
+
+					if (d2 < d1 && ((p2>0 && p4 < 0) || (p2<0 && p4 > 0))){
+				
+						trisect_store[i]._p1 = e->_u;
+						trisect_store[i]._p2 = t1_p;
+						trisect_store[i]._p3 = t2_p;
+
+						trisect_store[j]._p1 = e->_v;
+						trisect_store[j]._p2 = t1_p;
+						trisect_store[j]._p3 = t2_p;
+						flag++;
+
+					}
 				}
 			}
 		}
 	}
-	return true;
+	return flag;
 }
+
 
 
 void triangulate(){
