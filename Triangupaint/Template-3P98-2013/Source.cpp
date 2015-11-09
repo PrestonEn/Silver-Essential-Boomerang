@@ -1,4 +1,5 @@
 #include <vector>
+
 #include <algorithm>
 #include <random>
 #include <iostream>
@@ -20,10 +21,10 @@ mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this cas
 uniform_int_distribution<int> uni(50, 750);
 
 vector<Point> point_store;
-vector<int> hull_store;
+vector<Edge> hull_store;
 vector<Triangle> triangle_store;
 vector<Triangle> trisect_store;
-int numPoints, input_mode;
+int numPoints, input_mode, cog_index;
 
 int initStatus(){
 	cout << "Triangulation\n"
@@ -65,11 +66,6 @@ int distPointToLine(Point& P1, Point& P2, Point& p){
 	return num / (int)sqrt(den);
 }
 
-//if 0, p3 is colinear to vector(O,P2)
-double crossProd(Point& O, Point& P2, Point& P3){
-	return (long)(P2._x - O._x)*(P3._y - O._y) - (long)(P2._y - O._y)*(P3._x - O._x);
-}
-
 //Test uniqueness of point
 //switch to hash function 
 //in future branch
@@ -108,8 +104,9 @@ void covexHull(vector<Point>& p_set, int u, int v){
 		}
 	}
 	if (pMax == -1){
-		hull_store.push_back(u);
-		hull_store.push_back(v);
+		
+		hull_store.push_back(Edge(u,v));
+
 		return;
 	}
 	else{
@@ -121,10 +118,11 @@ void covexHull(vector<Point>& p_set, int u, int v){
 void quickHull(vector<Point> p_set, int u, int v){
 	covexHull(point_store, point_store.size() - 1, 0);
 	covexHull(point_store, 0, point_store.size() - 1);
+
 }
 
 int closestPoint(Point p){
-	int dist = 1000000;
+	int dist = 100000000;
 	int index = -1;
 	for (int i = 0; i < point_store.size(); i++){
 		if (point_store[i].distance(p) < dist){
@@ -140,8 +138,8 @@ int hullCOG(){
 	int sumx, sumy;
 	sumx = sumy=0;
 	for (int i = 0; i < hull_store.size(); i++){
-		sumx += point_store[hull_store[i]]._x;
-		sumy += point_store[hull_store[i]]._y;
+		sumx += point_store[hull_store[i]._u]._x;
+		sumy += point_store[hull_store[i]._u]._y;
 		count++;
 	}
 	return closestPoint(Point(sumx / count, sumy / count));
@@ -149,62 +147,68 @@ int hullCOG(){
 
 
 void trisect(Triangle& Ti){
-	int sumX = point_store[Ti._p1]._x +
-			   point_store[Ti._p2]._x +
-			   point_store[Ti._p3]._x;
+//INTERIOR_TO_T, COLINEAR_TO_T, VERTEX_OF_T, NOT_IN_T
 	
-	int sumY = point_store[Ti._p1]._y +
-		       point_store[Ti._p2]._y +
-			   point_store[Ti._p3]._y;
-	
-	int p =  closestPoint(Point(sumX/3, sumY/3));
+	int p;
+	int flag = -1;
+	for (int i = 0; i < point_store.size(); i++){
+		flag = -1;
+		cout << Ti.testInterior(point_store, i);
+		switch (Ti.testInterior(point_store, i)){
+			case INTERIOR_TO_T:
+			{
+				cout << " interior to t \n";
+				trisect(Triangle(Ti._p1, Ti._p2, i));
+				trisect(Triangle(Ti._p2, Ti._p3, i));
+				trisect(Triangle(Ti._p3, Ti._p1, i));
+				return;
+				break;
+			}
 
-	if (!Ti.testInterior(point_store, p)){
+			case COLINEAR_TO_T:
+			{
+				cout << "colinear in t \n";
+				flag = true;
+				Triangle points = Ti.getNonColinPoint(point_store, i);
+				trisect(Triangle(points._p1, points._p2, i));
+				trisect(Triangle(points._p1, points._p3, i));
+				return;
+				break;
+			}
+
+			case NOT_IN_T:
+				cout << "not in t \n";
+				break;
+			}
+	}
+		
+	if (flag == -1){
+		cout << "ADDING TO TRISECT_SET \n";
 		trisect_store.push_back(Ti);
 		return;
 	}
-	else{
-		trisect(Triangle(Ti._p1, Ti._p2, p));
-		trisect(Triangle(Ti._p2, Ti._p3, p));
-		trisect(Triangle(Ti._p3, Ti._p1, p));
-	}
+
 }
 
+
+///
+///
+///
+///
 bool triCleanUp(){
-	bool change_made = false;
-	for (int i = 0; i < trisect_store.size() - 2; i++){
-		for (int j = i+1; j < trisect_store.size() - 1; j++){
+	Edge *e;
+	for (int i = 0; i < trisect_store.size(); i++){
+		for (int j = 0; j < trisect_store.size(); j++){
 			if (i != j){
-				Edge test = trisect_store[i].sharedEdge(trisect_store[j]);
-				if (test._u >= 0 && i != j){
+				e = &trisect_store[i].sharedEdge(trisect_store[j]);
+				if (e->_u != -1){
 
-					int ti_p, tj_p;
-					int d1, d2, s1, s2;
 
-					if (trisect_store[i]._p1 != test._u && trisect_store[i]._p1 != test._v){ ti_p = trisect_store[i]._p1; }
-					else if (trisect_store[i]._p2 != test._u && trisect_store[i]._p2 != test._v){ ti_p = trisect_store[i]._p2; }
-					else{ ti_p = trisect_store[i]._p3; }
-
-					if (trisect_store[j]._p1 != test._u && trisect_store[j]._p1 != test._v){ tj_p = trisect_store[j]._p1; }
-					else if (trisect_store[j]._p2 != test._u && trisect_store[j]._p2 != test._v){ tj_p = trisect_store[j]._p2; }
-					else { tj_p = trisect_store[j]._p3; }
-
-					d1 = abs(point_store[test._u].distance(point_store[test._v]));
-					d2 = abs(point_store[ti_p].distance(point_store[tj_p]));
-					s1 = distPointToLine(point_store[ti_p], point_store[tj_p], point_store[test._u]);
-					s2 = distPointToLine(point_store[ti_p], point_store[tj_p], point_store[test._v]);
-
-					bool op_signs = (s1 > 0 && s2 < 0 || s1 < 0 && s2 > 0);
-					if (d1 > d2 && op_signs){
-						change_made = true;
-						trisect_store[i] = Triangle(test._u, ti_p, tj_p);
-						trisect_store[j] = Triangle(test._v, ti_p, tj_p);
-					}
-				}
 				}
 			}
 		}
-	return change_made;
+	}
+	return true;
 }
 
 
@@ -219,38 +223,74 @@ void triangulate(){
 
 	}
 	else{
-		int cog_index = hullCOG();
-		int j;
+		cog_index = hullCOG();
 		for (int i = 0; i < hull_store.size(); i++){
-			if (i == hull_store.size()-1){ j = 0; }
-			else{
-				j = i + 1;
-			}
-			triangle_store.push_back(Triangle(hull_store[i], hull_store[j], cog_index));
-		}
-	}
-	for (auto T : triangle_store){
-		trisect(T);
-	}
-	bool flag = true;
-	while (flag){
-		flag = triCleanUp();
-	}
-}
 
+			if (i != cog_index){
+				triangle_store.push_back(Triangle(hull_store[i]._u, hull_store[i]._v, cog_index));
+			}
+			
+		}
+		triangle_store.push_back(Triangle(hull_store[hull_store.size()-1]._v, hull_store[0]._u, cog_index));
+	}
+	trisect(triangle_store[0]);
+	for (auto t : triangle_store){
+	trisect(t);
+	}
+
+	//triCleanUp();
+}
 
 
 
 void display(){
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	glBegin(GL_TRIANGLES);
-	for (auto T : trisect_store){
+	for (auto T : triangle_store){
+		glColor3f(0.0, 1.0, 0.0);
 		glVertex2i(point_store[T._p1]._x, point_store[T._p1]._y);
 		glVertex2i(point_store[T._p2]._x, point_store[T._p2]._y);
 		glVertex2i(point_store[T._p3]._x, point_store[T._p3]._y);
 	}
 	glEnd();
 	glFlush();
+
+	glBegin(GL_TRIANGLES);
+	for (auto T : trisect_store){
+		glColor3f(0.0, 0.0, 1.0);
+		glVertex2i(point_store[T._p1]._x, point_store[T._p1]._y);
+		glVertex2i(point_store[T._p2]._x, point_store[T._p2]._y);
+		glVertex2i(point_store[T._p3]._x, point_store[T._p3]._y);
+	}
+	glEnd();
+	glFlush();
+
+	glPointSize(2);
+	
+	glBegin(GL_LINES);
+	glColor3f(1.0, 0.0, 0.0);
+	for (auto P : hull_store){
+		glVertex2i(point_store[P._u]._x, point_store[P._u]._y);
+		glVertex2i(point_store[P._v]._x, point_store[P._v]._y);
+	}
+	glEnd();
+	glFlush();
+
+	glBegin(GL_POINTS);
+	glColor3f(1.0, 0.0, 0.0);
+	for (auto P : point_store){
+		glVertex2i(P._x,P._y);
+	}
+	glEnd();
+	glFlush();
+
+	glBegin(GL_POINTS);
+	glColor3f(0.0, 1.0, 0.0);
+		glVertex2i(point_store[cog_index]._x, point_store[cog_index]._y);
+	glEnd();
+	glFlush();
+	
 }
 
 void mouse(int btn, int state, int x, int y) {
@@ -267,7 +307,7 @@ void mouse(int btn, int state, int x, int y) {
 
 int main(int argc, char** argv){
 	//input_mode = initStatus();
-	randomPoints(1000);
+	randomPoints(150);
 	triangulate();
 	glutInit(&argc, argv);
 
